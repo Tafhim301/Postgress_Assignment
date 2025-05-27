@@ -135,7 +135,7 @@ FROM (
 SELECT * FROM sightings WHERE LOCATION ILIKE '%Pass%';
 
 -- Problem 4
-SELECT name, count(sighting_id)
+SELECT name, count(sighting_id) AS total_sightings
 FROM sightings
     NATURAL JOIN rangers
 GROUP BY
