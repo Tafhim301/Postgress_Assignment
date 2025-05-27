@@ -3,11 +3,11 @@ CREATE DATABASE conservation_db;
 
 CREATE TABLE rangers (
     ranger_id SERIAL PRIMARY KEY NOT NULL,
-    species TEXT NOT NULL,
+    name TEXT NOT NULL,
     region VARCHAR(100)
 );
 
-alter table rangers RENAME COLUMN species to "name"
+
 
 CREATE Table species (
     species_id SERIAL PRIMARY KEY NOT NULL,
@@ -135,21 +135,61 @@ FROM (
 SELECT * FROM sightings WHERE LOCATION ILIKE '%Pass%';
 
 -- Problem 4
-SELECT name, count(sighting_id )
-    FROM sightings 
+SELECT name, count(sighting_id)
+FROM sightings
     NATURAL JOIN rangers
-    GROUP BY name,ranger_id
+GROUP BY
+    name,
+    ranger_id
 
 -- Problem 5
-SELECT common_name FROM species
- LEFT JOIN sightings ON species.species_id = sightings.species_id
- where sighting_id IS NULL
+SELECT common_name
+FROM species
+    LEFT JOIN sightings ON species.species_id = sightings.species_id
+where
+    sighting_id IS NULL
 
 -- Problem 6
-SELECT common_name,sighting_time,name FROM sightings
-JOIN rangers ON rangers.ranger_id = sightings.ranger_id
-JOIN species ON species.species_id = sightings.species_id
+SELECT common_name, sighting_time, name
+FROM
+    sightings
+    JOIN rangers ON rangers.ranger_id = sightings.ranger_id
+    JOIN species ON species.species_id = sightings.species_id
 ORDER BY sightings.sighting_time DESC
 LIMIT 2;
 
+-- Problem 7
+UPDATE species
+SET
+    conservation_status = 'historic'
+WHERE
+    discovery_date < '1800-01-01';
+
+-- Problem 8
+SELECT
+    sighting_id,
+    CASE
+        WHEN EXTRACT(
+            HOUR
+            FROM sighting_time
+        ) < 12 THEN 'Morning'
+        WHEN EXTRACT(
+            HOUR
+            FROM sighting_time
+        ) BETWEEN 12 AND 17  THEN 'Afternoon'
+        ELSE 'Evening'
+    END AS time_of_day
+FROM sightings;
+
+-- Probleblem 9
+
+DELETE FROM rangers
+WHERE
+    ranger_id IN (
+        SELECT rangers.ranger_id
+        FROM rangers
+            LEFT JOIN sightings on rangers.ranger_id = sightings.ranger_id
+        WHERE
+            sighting_id IS NULL
+    )
 
